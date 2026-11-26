@@ -1,0 +1,17 @@
+# Нууц тохиргоо — git рүү хэзээ ч бүү оруул
+.env
+
+# Өгөгдлийн сан, нууц түлхүүр
+data/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Бусад
+*.log
+.DS_Store
+Thumbs.db
+desktop.ini
+.claude/
