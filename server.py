@@ -100,8 +100,17 @@ app.add_middleware(SessionMiddleware, secret_key=_secret(), session_cookie="phys
 _hits: dict[str, list] = {}
 
 
+def _rate_limit_ip(request: Request) -> str:
+    if os.getenv("VERCEL") == "1":
+        forwarded_for = request.headers.get("x-forwarded-for", "")
+        client_ip = forwarded_for.split(",", 1)[0].strip()
+        if client_ip:
+            return client_ip
+    return request.client.host if request.client else "-"
+
+
 def limit(request: Request, key: str, n: int, per: int = 300):
-    ip = request.client.host if request.client else "-"
+    ip = _rate_limit_ip(request)
     now = time.time()
     lst = [t for t in _hits.get(f"{key}:{ip}", []) if now - t < per]
     if len(lst) >= n:
