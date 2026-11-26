@@ -7,7 +7,7 @@
 Админ: http://127.0.0.1:47650/admin — нэвтрэх мэйл/нууц үг `.env` доторх `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
 LAN-д нээх бол `.env`-д `HOST=0.0.0.0`.
 
-- Гарын авлага: сайт дээр **📖 Тусламж** (`/#/guide`) — эх файл `static/guide.md`
+- Гарын авлага: зөвхөн админд харагдана (`/#/guide`) — эх файл `guide.md`
 - Git болон Vercel-д байршуулах заавар: [DEPLOY.md](DEPLOY.md) (Vercel дээр Postgres, локалд SQLite)
 
 ## Сурагчийн урсгал

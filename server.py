@@ -738,6 +738,12 @@ def a_user_del(uid: int, a=Depends(auth.require_admin)):
     return {"ok": True}
 
 
+@app.get("/api/admin/guide")
+def a_guide(response: Response, a=Depends(auth.require_admin)):
+    response.headers["Cache-Control"] = "private, no-store"
+    return {"markdown": (BASE / "guide.md").read_text(encoding="utf-8")}
+
+
 # ---------------- static ----------------
 STATIC = BASE / "static"
 

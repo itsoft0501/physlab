@@ -21,8 +21,7 @@ function renderTop() {
   const h = location.hash;
   const navItems = u && u.placed_at ? [["#/map", "🗺️", "Газрын зураг"], ["#/leaderboard", "🏆", "Тэргүүлэгчид"], ["#/profile", "👤", "Профайл"]] : [];
   $("#nav").innerHTML = navItems.map(([href, , t]) => `<a href="${href}" class="${h.startsWith(href) ? "on" : ""}">${t}</a>`).join("")
-    + `<a href="#/guide" class="${h.startsWith("#/guide") ? "on" : ""}">📖 Тусламж</a>`
-    + (u && u.role === "admin" ? `<a href="/admin">⚙️ Админ</a>` : "");
+    + (u && u.role === "admin" ? `<a href="#/guide" class="${h.startsWith("#/guide") ? "on" : ""}">📖 Гарын авлага</a><a href="/admin">⚙️ Админ</a>` : "");
   const bn = $("#bottomnav");
   bn.classList.toggle("hide", !navItems.length);
   bn.innerHTML = navItems.map(([href, ic, t]) => `<a href="${href}" class="${h.startsWith(href) ? "on" : ""}"><span>${ic}</span>${t}</a>`).join("");
@@ -46,7 +45,10 @@ async function route() {
   const qs = new URLSearchParams(query || "");
   renderTop();
   try {
-    if (parts[0] === "guide") return await guideView(qs);
+    if (parts[0] === "guide") {
+      if (!S.me || S.me.role !== "admin") return (location.hash = S.me ? "#/map" : "#/login?next=admin");
+      return await guideView(qs);
+    }
     if (!S.me) {
       if (parts[0] === "login") return await loginView(qs);
       if (parts[0] === "register") return await registerView();
@@ -96,7 +98,7 @@ function landing() {
       ["🏆", "Тэргүүлэгчид", "Ангийнхантайгаа XP-ээр өрсөлд."]]
       .map(([i, t, d]) => `<div class="card feat"><div class="ic">${i}</div><h3>${t}</h3><p class="muted small">${d}</p></div>`).join("")}
   </section>
-  <p class="center" style="margin-top:24px"><a class="btn ghost" href="#/guide">📖 Гарын авлага</a></p>`;
+  `;
 }
 
 // ---------------- auth ----------------
@@ -519,7 +521,7 @@ async function profileView() {
     <div class="avatar" style="width:84px;height:84px;font-size:2.6rem">${esc(u.avatar)}</div>
     <div style="flex:1;min-width:200px"><h1 style="margin:0">${esc(u.name)}</h1>
       <div class="muted">${u.grade ? u.grade + "-р анги · " : ""}${r.level ? `${esc(r.level.icon)} ${esc(r.level.name)}` : "Түвшин тогтоогоогүй"}</div></div>
-    <div class="row"><a class="btn ghost sm" href="#/guide">📖 Тусламж</a><button class="btn ghost sm" id="edit">✏️ Засах</button><button class="btn ghost sm" id="out">Гарах</button></div>
+    <div class="row">${u.role === "admin" ? `<a class="btn ghost sm" href="#/guide">📖 Гарын авлага</a>` : ""}<button class="btn ghost sm" id="edit">✏️ Засах</button><button class="btn ghost sm" id="out">Гарах</button></div>
   </div>
   <div id="editbox"></div>
   <div class="grid g3" style="margin-bottom:18px">
@@ -563,8 +565,7 @@ async function leaderboardView(qs) {
 
 // ---------------- гарын авлага ----------------
 async function guideView(qs) {
-  const r = await fetch("/static/guide.md", { cache: "no-cache" });
-  const src = await r.text();
+  const { markdown: src } = await api("/api/admin/guide", { cache: "no-store" });
   // Гарын авлагад томьёоны жишээ код хэлбэрээр харагдах ёстой тул KaTeX ашиглахгүй
   const html = window.marked ? marked.parse(src) : `<pre>${esc(src)}</pre>`;
   app.innerHTML = `<div class="narrow" style="margin:auto"><div class="card md guide">${html}</div></div>`;
